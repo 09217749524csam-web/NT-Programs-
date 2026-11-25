@@ -1,0 +1,169 @@
+
+clc;
+clear;
+close all;
+
+%% Solving Linear Congruence
+% Equation: ax = b (mod m)
+
+fprintf('=============================================\n');
+fprintf('   SOLVING LINEAR CONGRUENCE\n');
+fprintf('=============================================\n');
+
+%% Input
+a = input('Enter the value of a: ');
+b = input('Enter the value of b: ');
+m = input('Enter the positive modulus m: ');
+
+if m <= 0 || floor(m) ~= m
+    error('Modulus m must be a positive integer.');
+end
+
+% Reduce a and b modulo m
+a = mod(a, m);
+b = mod(b, m);
+
+fprintf('\nThe congruence is:\n');
+fprintf('%dx = %d (mod %d)\n', a, b, m);
+
+%% METHOD 1: BRUTE-FORCE METHOD
+fprintf('\n=============================================\n');
+fprintf('METHOD 1: BRUTE-FORCE METHOD\n');
+fprintf('=============================================\n');
+
+solutions = [];
+
+for x = 0:m-1
+    if mod(a*x, m) == b
+        solutions = [solutions, x];
+    end
+end
+
+if isempty(solutions)
+    fprintf('No solution exists.\n');
+else
+    fprintf('Solutions obtained by brute force:\n');
+
+    for i = 1:length(solutions)
+        fprintf('x = %d\n', solutions(i));
+    end
+end
+
+%% METHOD 2: MODULAR INVERSE METHOD
+fprintf('\n=============================================\n');
+fprintf('METHOD 2: MODULAR INVERSE METHOD\n');
+fprintf('=============================================\n');
+
+d = gcd(a,m);
+fprintf('gcd(a,m) = %d\n', d);
+
+if d ~= 1
+
+    fprintf(['Since gcd(a,m) is not 1, the ordinary modular inverse\n' ...
+             'of a modulo m does not exist.\n']);
+
+    if mod(b,d) ~= 0
+
+        fprintf('Since gcd(a,m) does not divide b,\n');
+        fprintf('the congruence has NO solution.\n');
+
+    else
+
+        fprintf(['Since gcd(a,m) divides b, solutions exist.\n' ...
+                 'They are obtained using the reduced congruence.\n']);
+
+        % Reduce the congruence
+        a1 = a/d;
+        b1 = b/d;
+        m1 = m/d;
+
+        % Find inverse of a1 modulo m1
+        [g, u, ~] = extendedGCD(a1,m1);
+
+        if g ~= 1
+            fprintf('Modular inverse could not be computed.\n');
+
+        else
+            inv_a1 = mod(u,m1);
+
+            fprintf('Reduced congruence:\n');
+            fprintf('%dx = %d (mod %d)\n', a1,b1,m1);
+
+            fprintf('Modular inverse of %d modulo %d = %d\n', ...
+                    a1,m1,inv_a1);
+
+            x0 = mod(inv_a1*b1,m1);
+
+            fprintf('Basic solution: x = %d (mod %d)\n',x0,m1);
+
+            fprintf('All solutions modulo %d are:\n',m);
+
+            allSolutions = zeros(1,d);
+
+            for k = 0:d-1
+                allSolutions(k+1) = x0 + k*m1;
+                fprintf('x = %d\n',allSolutions(k+1));
+            end
+        end
+    end
+
+else
+
+    % gcd(a,m) = 1, so inverse exists
+    [g,u,~] = extendedGCD(a,m);
+
+    if g == 1
+        inverse_a = mod(u,m);
+
+        fprintf('Modular inverse of %d modulo %d = %d\n', ...
+                a,m,inverse_a);
+
+        x_inverse = mod(inverse_a*b,m);
+
+        fprintf('Solution using modular inverse:\n');
+        fprintf('x = %d (mod %d)\n',x_inverse,m);
+    end
+end
+
+%% COMPARISON
+fprintf('\n=============================================\n');
+fprintf('COMPARISON OF METHODS\n');
+fprintf('=============================================\n');
+
+if ~isempty(solutions)
+
+    fprintf('Brute-force solutions: ');
+    fprintf('%d ',solutions);
+    fprintf('\n');
+
+    if d == 1
+        fprintf('Modular inverse solution: x = %d\n',x_inverse);
+
+        if solutions(1) == x_inverse
+            fprintf('Both methods give the same solution.\n');
+        else
+            fprintf('Check the calculations.\n');
+        end
+    end
+
+else
+    fprintf('Both methods indicate that there is no solution.\n');
+end
+
+fprintf('=============================================\n');
+
+%% FUNCTION: EXTENDED EUCLIDEAN ALGORITHM
+function [g,x,y] = extendedGCD(a,b)
+
+    if b == 0
+        g = a;
+        x = 1;
+        y = 0;
+
+    else
+        [g,x1,y1] = extendedGCD(b,mod(a,b));
+
+        x = y1;
+        y = x1 - floor(a/b)*y1;
+    end
+end
