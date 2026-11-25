@@ -1,0 +1,57 @@
+
+% Program for Chinese Remainder Theorem
+% To solve simultaneous linear congruences
+
+clc;
+clear;
+
+% Number of congruences
+n = input('Enter the number of congruences: ');
+
+% Input remainders and moduli
+a = zeros(1,n);
+m = zeros(1,n);
+
+for i = 1:n
+    a(i) = input(['Enter remainder a', num2str(i), ': ']);
+    m(i) = input(['Enter modulus m', num2str(i), ': ']);
+end
+
+% Check whether moduli are pairwise coprime
+for i = 1:n
+    for j = i+1:n
+        if gcd(m(i),m(j)) ~= 1
+            error('The moduli must be pairwise coprime.');
+        end
+    end
+end
+
+% Calculate product of all moduli
+M = prod(m);
+
+% Initialize solution
+x = 0;
+
+% Apply Chinese Remainder Theorem
+for i = 1:n
+
+    % Calculate Mi
+    Mi = M / m(i);
+
+    % Find multiplicative inverse of Mi modulo mi
+    [~, yi, ~] = gcd(Mi, m(i));
+
+    % Convert inverse to positive value
+    yi = mod(yi, m(i));
+
+    % CRT formula
+    x = x + a(i) * Mi * yi;
+
+end
+
+% Reduce solution modulo M
+x = mod(x, M);
+
+% Display result
+fprintf('\nThe solution is:\n');
+fprintf('x = %d (mod %d)\n', x, M);
