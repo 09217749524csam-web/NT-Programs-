@@ -1,0 +1,92 @@
+
+clc;
+clear;
+
+% Computation of Euler's Phi and Mobius Functions
+
+n = input('Enter a positive integer n: ');
+
+if n <= 0 || floor(n) ~= n
+    error('Please enter a positive integer.');
+end
+
+%% Euler Phi Function
+
+phi = n;
+temp = n;
+p = 2;
+
+while p * p <= temp
+
+    if mod(temp, p) == 0
+
+        % p is a prime factor of n
+        phi = phi - phi / p;
+
+        % Remove all occurrences of p
+        while mod(temp, p) == 0
+            temp = temp / p;
+        end
+    end
+
+    p = p + 1;
+end
+
+% If remaining temp is greater than 1, it is a prime factor
+if temp > 1
+    phi = phi - phi / temp;
+end
+
+phi = round(phi);
+
+%% Mobius Function
+
+if n == 1
+    mu = 1;
+
+else
+    temp = n;
+    count = 0;
+    repeated = false;
+    p = 2;
+
+    while p * p <= temp
+
+        if mod(temp, p) == 0
+
+            count = count + 1;
+            temp = temp / p;
+
+            % Check whether p occurs more than once
+            if mod(temp, p) == 0
+                repeated = true;
+            end
+
+            % Remove remaining occurrences of p
+            while mod(temp, p) == 0
+                temp = temp / p;
+            end
+        end
+
+        p = p + 1;
+    end
+
+    % Remaining factor is a distinct prime
+    if temp > 1
+        count = count + 1;
+    end
+
+    if repeated
+        mu = 0;
+    else
+        mu = (-1)^count;
+    end
+end
+
+%% Display Results
+
+fprintf('\n----------------------------------\n');
+fprintf('For n = %d\n', n);
+fprintf('Euler Phi function, phi(%d) = %d\n', n, phi);
+fprintf('Mobius function, mu(%d) = %d\n', n, mu);
+fprintf('----------------------------------\n');
