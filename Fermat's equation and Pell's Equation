@@ -1,0 +1,126 @@
+
+clc;
+clear;
+close all;
+
+%% PART A: PELL'S EQUATION USING CONTINUED FRACTIONS
+
+fprintf('====================================\n');
+fprintf(' SOLVING PELL EQUATION\n');
+fprintf('====================================\n');
+
+D = input('Enter a positive non-square integer D: ');
+
+if D <= 0 || floor(D) ~= D || floor(sqrt(D))^2 == D
+    error('D must be a positive non-square integer.');
+end
+
+% Continued fraction expansion of sqrt(D)
+
+a0 = floor(sqrt(D));
+
+m = 0;
+d = 1;
+a = a0;
+
+% Initial convergent values
+p_prev2 = 0;
+p_prev1 = 1;
+
+q_prev2 = 1;
+q_prev1 = 0;
+
+n = 0;
+
+fprintf('\nContinued Fraction Convergents:\n');
+fprintf(' n   p_n     q_n     x^2-Dy^2\n');
+
+while true
+
+    % Calculate current convergent
+    p = a*p_prev1 + p_prev2;
+    q = a*q_prev1 + q_prev2;
+
+    % Check Pell's equation
+    value = p^2 - D*q^2;
+
+    fprintf('%2d %10d %10d %12d\n', ...
+        n, p, q, value);
+
+    % Fundamental solution found
+    if value == 1
+        x = p;
+        y = q;
+        break;
+    end
+
+    % Update convergents
+    p_prev2 = p_prev1;
+    p_prev1 = p;
+
+    q_prev2 = q_prev1;
+    q_prev1 = q;
+
+    % Generate next continued fraction coefficient
+    m = d*a - m;
+    d = (D - m^2)/d;
+    a = floor((a0 + m)/d);
+
+    n = n + 1;
+
+end
+
+fprintf('\nFundamental Solution:\n');
+fprintf('x = %d\n', x);
+fprintf('y = %d\n', y);
+
+fprintf('Verification:\n');
+fprintf('%d^2 - %d*(%d^2) = %d\n', ...
+    x, D, y, x^2-D*y^2);
+
+
+%% PART B: FERMAT'S EQUATION
+
+fprintf('\n====================================\n');
+fprintf(' SOLVING FERMAT EQUATION\n');
+fprintf('====================================\n');
+
+N = input('Enter exponent n (2 or greater): ');
+L = input('Enter maximum search limit: ');
+
+if N < 2 || floor(N) ~= N || L < 1 || floor(L) ~= L
+    error('Enter a valid integer exponent and search limit.');
+end
+
+found = false;
+
+fprintf('\nSearching for solutions of:\n');
+fprintf('x^%d + y^%d = z^%d\n', N, N, N);
+
+for x = 1:L
+    for y = x:L
+
+        S = x^N + y^N;
+
+        z = round(S^(1/N));
+
+        % Check for an exact integer solution
+        if z <= L && z^N == S
+            fprintf('Solution found: x=%d, y=%d, z=%d\n', ...
+                x, y, z);
+            found = true;
+        end
+
+    end
+end
+
+if ~found
+    fprintf('No solution found within the specified limit.\n');
+end
+
+if N == 2
+    fprintf('\nFor n=2, Pythagorean triples exist.\n');
+elseif N > 2
+    fprintf(['For n>2, Fermat''s Last Theorem states ' ...
+        'that no positive integer solutions exist.\n']);
+end
