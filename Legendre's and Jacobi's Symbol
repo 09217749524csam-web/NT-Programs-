@@ -1,0 +1,65 @@
+
+clc;
+clear;
+
+% Implementation of Legendre and Jacobi Symbols
+
+a = input('Enter the integer a: ');
+p = input('Enter an odd prime p for Legendre symbol: ');
+n = input('Enter an odd positive integer n for Jacobi symbol: ');
+
+% Validate inputs
+if p < 3 || p ~= floor(p) || mod(p,2) == 0 || ~isprime(p)
+    error('p must be an odd prime.');
+end
+
+if n < 3 || n ~= floor(n) || mod(n,2) == 0
+    error('n must be an odd positive integer greater than 1.');
+end
+
+% Compute Legendre symbol
+if mod(a,p) == 0
+    L = 0;
+else
+    r = powermod(mod(a,p), (p-1)/2, p);
+
+    if r == 1
+        L = 1;
+    elseif r == p-1
+        L = -1;
+    else
+        error('Unexpected result in Euler criterion.');
+    end
+end
+
+% Compute Jacobi symbol
+factors = factor(n);
+J = 1;
+
+for i = 1:length(factors)
+    q = factors(i);
+
+    if mod(a,q) == 0
+        J = 0;
+        break;
+    else
+        r = powermod(mod(a,q), (q-1)/2, q);
+
+        if r == 1
+            leg = 1;
+        elseif r == q-1
+            leg = -1;
+        else
+            error('Unexpected result in Euler criterion.');
+        end
+
+        J = J * leg;
+    end
+end
+
+% Display results
+fprintf('\nLegendre Symbol:\n');
+fprintf('(%d/%d) = %d\n', a, p, L);
+
+fprintf('\nJacobi Symbol:\n');
+fprintf('(%d/%d) = %d\n', a, n, J);
