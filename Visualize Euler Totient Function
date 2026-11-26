@@ -1,0 +1,142 @@
+
+clc;
+clear;
+close all;
+
+%% NUMBER THEORETIC FUNCTION: EULER'S TOTIENT FUNCTION
+
+fprintf('====================================\n');
+fprintf(' EULER TOTIENT FUNCTION VISUALIZATION\n');
+fprintf('====================================\n');
+
+N = input('Enter the maximum value of N: ');
+
+if ~isnumeric(N) || ~isscalar(N) || ~isfinite(N) || ...
+      N < 1 || floor(N) ~= N
+   error('Enter a positive integer.');
+end
+
+%% STEP 1: INITIALIZE THE TOTIENT ARRAY
+
+phi = 1:N;
+
+%% STEP 2: SIEVE METHOD TO CALCULATE PHI(N)
+
+for p = 2:floor(sqrt(N))
+
+  % If phi(p) = p, then p is prime
+  if phi(p) == p
+
+      % Update all multiples of prime p
+      for k = p:p:N
+         phi(k) = phi(k) - phi(k)/p;
+      end
+
+  end
+
+end
+
+% Special case
+phi(1) = 1;
+
+%% STEP 3: DISPLAY THE VALUES
+
+fprintf('\n n      phi(n)      phi(n)/n\n');
+fprintf('--------------------------------\n');
+
+for n = 1:N
+   fprintf('%4d      %4d          %.4f\n', ...
+      n, phi(n), phi(n)/n);
+end
+
+%% STEP 4: IDENTIFY PRIME NUMBERS
+
+prime = isprime(1:N);
+
+prime_numbers = find(prime);
+composite_numbers = find(~prime & (1:N) > 1);
+
+%% STEP 5: GRAPHICAL VISUALIZATION
+
+figure('Name','Euler Totient Function Analysis');
+
+% Graph 1: Distribution of phi(n)
+subplot(2,2,1);
+
+plot(1:N, phi, 'b.-', 'LineWidth', 1.2);
+hold on;
+
+plot(prime_numbers, phi(prime_numbers), ...
+  'ro', 'MarkerFaceColor','r');
+
+xlabel('n');
+ylabel('\phi(n)');
+title('Distribution of Euler Totient Function');
+legend('\phi(n)','Prime Numbers');
+grid on;
+
+% Graph 2: Ratio phi(n)/n
+subplot(2,2,2);
+
+ratio = phi./(1:N);
+
+plot(1:N, ratio, 'm.-', 'LineWidth', 1.2);
+
+xlabel('n');
+ylabel('\phi(n)/n');
+title('Ratio of Totient Function');
+ylim([0 1.05]);
+grid on;
+
+% Graph 3: Comparison of prime and composite numbers
+subplot(2,2,3);
+
+plot(prime_numbers, phi(prime_numbers), ...
+  'ro', 'MarkerFaceColor','r');
+hold on;
+
+plot(composite_numbers, phi(composite_numbers), ...
+  'b.', 'MarkerSize',10);
+
+xlabel('n');
+ylabel('\phi(n)');
+title('Prime vs Composite Numbers');
+legend('Prime','Composite');
+grid on;
+
+% Graph 4: Number of integers relatively prime to n
+subplot(2,2,4);
+
+bar(1:N, phi, 'FaceColor',[0.2 0.6 0.8]);
+
+xlabel('n');
+ylabel('\phi(n)');
+title('Totient Values for Different Integers');
+grid on;
+
+sgtitle('Graphical Analysis of Euler Totient Function');
+
+%% STEP 6: DISPLAY IMPORTANT OBSERVATIONS
+
+fprintf('\n====================================\n');
+fprintf(' MATHEMATICAL OBSERVATIONS\n');
+fprintf('====================================\n');
+
+fprintf('Total number of integers considered = %d\n', N);
+
+fprintf('Number of primes = %d\n', length(prime_numbers));
+
+fprintf('Maximum value of phi(n) = %d\n', max(phi));
+
+fprintf('Minimum value of phi(n) = %d\n', min(phi));
+
+fprintf('Average value of phi(n)/n = %.4f\n', mean(ratio));
+
+fprintf('\nPrime number observations:\n');
+
+for i = 1:length(prime_numbers)
+   p = prime_numbers(i);
+   fprintf('phi(%d) = %d\n', p, phi(p));
+end
+
+fprintf('\nVisualization completed successfully.\n');
