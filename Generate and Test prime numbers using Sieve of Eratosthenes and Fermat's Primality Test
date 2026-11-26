@@ -1,0 +1,133 @@
+
+clc;
+clear;
+close all;
+
+% Prime Number Generation and Testing
+% Methods: Sieve of Eratosthenes and Fermat Test
+
+N = input('Enter the upper limit N: ');
+
+if N < 2 || N ~= floor(N)
+    error('Please enter an integer N greater than or equal to 2.');
+end
+
+%% Method 1: Sieve of Eratosthenes
+
+isPrime = true(1, N);
+isPrime(1) = false;
+
+for p = 2:floor(sqrt(N))
+    if isPrime(p)
+        isPrime(p*p:p:N) = false;
+    end
+end
+
+primesSieve = find(isPrime);
+
+fprintf('\nPrime numbers using Sieve of Eratosthenes:\n');
+disp(primesSieve);
+
+fprintf('Total primes found by Sieve = %d\n', ...
+    length(primesSieve));
+
+%% Method 2: Fermat Primality Test
+
+% Test each integer from 2 to N
+primesFermat = [];
+
+for n = 2:N
+    if fermatTest(n, 10)
+        primesFermat = [primesFermat, n]; %#ok<AGROW>
+    end
+end
+
+fprintf('\nNumbers classified as probably prime by Fermat test:\n');
+disp(primesFermat);
+
+fprintf('Total probable primes found by Fermat = %d\n', ...
+    length(primesFermat));
+
+%% Compare the two methods
+
+fprintf('\nComparison:\n');
+fprintf('Sieve prime count       = %d\n', length(primesSieve));
+fprintf('Fermat probable count   = %d\n', length(primesFermat));
+
+fprintf('\nNote: Fermat test can classify some composite numbers\n');
+fprintf('as probably prime. The Sieve gives exact results.\n');
+
+%% Plot 1: Distribution of primes
+
+figure;
+plot(primesSieve, ones(size(primesSieve)), 'b.', ...
+    'MarkerSize', 12);
+xlabel('Integer n');
+ylabel('Prime indicator');
+title('Distribution of Prime Numbers');
+ylim([0.5 1.5]);
+grid on;
+
+%% Plot 2: Number of primes up to x
+
+primeCount = cumsum(isPrime);
+
+figure;
+plot(1:N, primeCount, 'r-', 'LineWidth', 1.5);
+xlabel('Upper limit x');
+ylabel('\pi(x): Number of primes <= x');
+title('Cumulative Distribution of Prime Numbers');
+grid on;
+
+%% Local function: Fermat primality test
+
+function result = fermatTest(n, trials)
+
+    if n < 2
+        result = false;
+        return;
+    end
+
+    if n == 2 || n == 3
+        result = true;
+        return;
+    end
+
+    if mod(n, 2) == 0
+        result = false;
+        return;
+    end
+
+    result = true;
+
+    for k = 1:trials
+        % Random base a between 2 and n-2
+        a = randi([2, n-2]);
+
+        % Fermat's little theorem:
+        % a^(n-1) mod n should equal 1
+
+        if gcd(a, n) ~= 1 || ...
+                powermod_local(a, n-1, n) ~= 1
+            result = false;
+            return;
+        end
+    end
+end
+
+%% Modular exponentiation without forming a^b directly
+
+function r = powermod_local(a, b, m)
+
+    r = 1;
+    a = mod(a, m);
+
+    while b > 0
+        if mod(b, 2) == 1
+            r = mod(r * a, m);
+        end
+
+        a = mod(a * a, m);
+        b = floor(b / 2);
+    end
+end
