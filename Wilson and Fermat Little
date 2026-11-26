@@ -1,0 +1,58 @@
+
+clc;
+clear;
+
+% Input the number
+n = input('Enter a positive integer greater than 1: ');
+
+if n <= 1 || floor(n) ~= n
+    error('Please enter an integer greater than 1.');
+end
+
+%% WILSON'S THEOREM
+
+% Calculate (n-1)! mod n without calculating the large factorial directly
+w = 1;
+
+for i = 1:n-1
+    w = mod(w * i, n);
+end
+
+fprintf('\n--- Wilson''s Theorem ---\n');
+
+if w == n-1
+     fprintf('%d is PRIME according to Wilson''s Theorem.\n', n);
+else
+     fprintf('%d is COMPOSITE according to Wilson''s Theorem.\n', n);
+end
+
+%% FERMAT'S LITTLE THEOREM
+
+fprintf('\n--- Fermat''s Little Theorem ---\n');
+
+if n == 2
+     fprintf('2 is PRIME.\n');
+else
+     a = 2;   % Choose base a = 2
+
+     % First check whether a and n are coprime
+     if gcd(a,n) ~= 1
+          fprintf('%d is COMPOSITE since gcd(%d,%d) ~= 1.\n', n, a, n);
+     else
+          % Calculate a^(n-1) mod n efficiently
+          result = 1;
+
+          for i = 1:n-1
+              result = mod(result * a, n);
+          end
+
+          fprintf('%d^(%d) mod %d = %d\n', a, n-1, n, result);
+
+          if result == 1
+              fprintf('%d passes the Fermat primality test.\n', n);
+              fprintf('It may be prime.\n');
+          else
+              fprintf('%d is COMPOSITE according to Fermat''s test.\n', n);
+          end
+     end
+end
