@@ -1,0 +1,149 @@
+
+clc;
+clear;
+
+fprintf('========== RSA CRYPTOGRAPHIC SYSTEM ==========\n');
+
+% Step 1: Enter two prime numbers
+p = input('Enter first prime number (p): ');
+q = input('Enter second prime number (q): ');
+
+% Validate prime numbers
+if p ~= floor(p) || q ~= floor(q) || p < 2 || q < 2 || p == q || ~isPrime(p) || ~isPrime(q)
+    error('Enter two distinct prime numbers.');
+end
+
+% Calculate modulus and Euler Totient
+n = p * q;
+phi = (p-1) * (q-1);
+
+% Maintain exact integer arithmetic
+if n > 2^26
+    error('Choose smaller primes for this educational program.');
+end
+
+fprintf('\nStep 1: Key Generation\n');
+fprintf('n = p*q = %d\n', n);
+fprintf('Euler Totient phi(n) = %d\n', phi);
+
+% Step 2: Select public exponent e
+e = 2;
+
+while e < phi
+    if gcd(e, phi) == 1
+        break;
+    end
+    e = e + 1;
+end
+
+if e >= phi
+    error('Unable to find a suitable public exponent.');
+end
+
+% Step 3: Calculate private exponent d
+[d, x, ~] = extendedEuclid(e, phi);
+d = mod(x, phi);
+
+% Display keys
+fprintf('\nPublic Key = (%d, %d)\n', e, n);
+fprintf('Private Key = (%d, %d)\n', d, n);
+
+% Step 4: Enter message
+msg = input('\nEnter the message: ', 's');
+
+% Convert message into ASCII values
+M = double(msg);
+
+if any(M >= n)
+    error('Choose larger primes so that n exceeds every ASCII value.');
+end
+
+fprintf('\nOriginal Message: %s\n', msg);
+fprintf('ASCII Values: ');
+fprintf('%d ', M);
+
+% Step 5: Encryption
+C = zeros(size(M));
+
+for i = 1:length(M)
+    C(i) = modExp(M(i), e, n);
+end
+
+fprintf('\n\nEncrypted Message:\n');
+fprintf('%d ', C);
+
+% Step 6: Decryption
+D = zeros(size(C));
+
+for i = 1:length(C)
+    D(i) = modExp(C(i), d, n);
+end
+
+% Convert decrypted ASCII values into characters
+decryptedMsg = char(D);
+
+fprintf('\n\nDecrypted ASCII Values:\n');
+fprintf('%d ', D);
+
+fprintf('\n\nDecrypted Message: %s\n', decryptedMsg);
+
+% Step 7: Verification
+if strcmp(msg, decryptedMsg)
+    fprintf('\nRSA Verification Successful!\n');
+    fprintf('Original and decrypted messages are identical.\n');
+else
+    fprintf('\nRSA Verification Failed!\n');
+end
+
+% Function 1: Check prime number
+function flag = isPrime(num)
+
+    flag = true;
+
+    if num < 2 || num ~= floor(num)
+        flag = false;
+        return;
+    end
+
+    for k = 2:floor(sqrt(num))
+        if mod(num,k) == 0
+            flag = false;
+            return;
+        end
+    end
+
+end
+
+% Function 2: Extended Euclidean Algorithm
+function [g,x,y] = extendedEuclid(a,b)
+
+    if b == 0
+        g = a;
+        x = 1;
+        y = 0;
+    else
+        [g,x1,y1] = extendedEuclid(b,mod(a,b));
+        x = y1;
+        y = x1 - floor(a/b)*y1;
+    end
+
+end
+
+% Function 3: Modular Exponentiation
+function result = modExp(base,power,modulus)
+
+    result = 1;
+    base = mod(base,modulus);
+
+    while power > 0
+
+        if mod(power,2) == 1
+            result = mod(result*base,modulus);
+        end
+
+        base = mod(base*base,modulus);
+        power = floor(power/2);
+
+    end
+
+end
